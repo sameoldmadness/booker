@@ -19,28 +19,16 @@ main =
 -- TYPES
 
 
-type alias Form =
+type alias Book =
     { title : String
     , author : String
     , genre : String
     }
 
 
-type alias Index =
-    Int
-
-
-type alias Indexed a =
-    { a | index : Index }
-
-
-type alias Book =
-    Indexed Form
-
-
 type alias Model =
     { books : List Book
-    , form : Form
+    , form : Book
     }
 
 
@@ -49,15 +37,15 @@ type Message
     | Title String
     | Author String
     | Genre String
-    | Remove Int
+    | Remove Book
 
 
 
 -- MODEL
 
 
-emptyForm : Form
-emptyForm =
+emptyBook : Book
+emptyBook =
     { title = ""
     , author = ""
     , genre = ""
@@ -67,7 +55,7 @@ emptyForm =
 model : Model
 model =
     { books = []
-    , form = emptyForm
+    , form = emptyBook
     }
 
 
@@ -91,10 +79,10 @@ bookDescription { author, title, genre } =
         )
 
 
-bookRemoveButton : Indexed a -> Html.Html Message
-bookRemoveButton { index } =
+bookRemoveButton : Book -> Html.Html Message
+bookRemoveButton book =
     span
-        [ class "book__remove", onClick (Remove index) ]
+        [ class "book__remove", onClick (Remove book) ]
         [ text "✕" ]
 
 
@@ -144,73 +132,59 @@ view { books, form } =
 -- UPDATE
 
 
-bookFromForm : Form -> Index -> Book
-bookFromForm { author, genre, title } index =
-    { author = author
-    , title = title
-    , genre = genre
-    , index = index
-    }
-
-
-extractBook : Model -> Book
-extractBook model =
-    bookFromForm model.form (List.length model.books)
-
-
 copyBookFromForm : Model -> Model
 copyBookFromForm model =
-    { model | books = extractBook model :: model.books }
+    { model | books = model.form :: model.books }
 
 
 clearForm : Model -> Model
 clearForm model =
-    { model | form = emptyForm }
+    { model | form = emptyBook }
 
 
-setForm : Form -> Model -> Model
+setForm : Book -> Model -> Model
 setForm form model =
     { model | form = form }
 
 
-asFormIn : Model -> Form -> Model
+asFormIn : Model -> Book -> Model
 asFormIn =
     flip setForm
 
 
-setAuthor : String -> Form -> Form
+setAuthor : String -> Book -> Book
 setAuthor author form =
     { form | author = author }
 
 
-asAuthorIn : Form -> String -> Form
+asAuthorIn : Book -> String -> Book
 asAuthorIn =
     flip setAuthor
 
 
-setGenre : String -> Form -> Form
+setGenre : String -> Book -> Book
 setGenre genre form =
     { form | genre = genre }
 
 
-asGenreIn : Form -> String -> Form
+asGenreIn : Book -> String -> Book
 asGenreIn =
     flip setGenre
 
 
-setTitle : String -> Form -> Form
+setTitle : String -> Book -> Book
 setTitle title form =
     { form | title = title }
 
 
-asTitleIn : Form -> String -> Form
+asTitleIn : Book -> String -> Book
 asTitleIn =
     flip setTitle
 
 
-removeBook : Int -> Model -> Model
-removeBook index model =
-    { model | books = List.filter (\x -> x.index /= index) model.books }
+removeBook : Book -> Model -> Model
+removeBook book model =
+    { model | books = List.filter (\b -> b /= book) model.books }
 
 
 update : Message -> Model -> Model
@@ -236,6 +210,6 @@ update message model =
                 |> asGenreIn model.form
                 |> asFormIn model
 
-        Remove index ->
+        Remove book ->
             model
-                |> removeBook index
+                |> removeBook book
