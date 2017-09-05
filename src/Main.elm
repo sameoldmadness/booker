@@ -1,4 +1,4 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Html exposing (button, div, input, li, span, text, ul)
 import Html.Attributes exposing (class, href, placeholder, rel, value)
@@ -6,16 +6,21 @@ import Html.Events exposing (onClick, onInput)
 import String.Format exposing (format3)
 
 
-main : Program Never Model Message
+main : Program (Maybe Model) Model Message
 main =
-    Html.beginnerProgram
-        { model = model
-        , view = view
+    Html.programWithFlags
+        { init = init
         , update = update
+        , subscriptions = subscriptions
+        , view = view
         }
 
 
 
+-- { model = model
+-- , view = view
+-- , update = update
+-- }
 -- TYPES
 
 
@@ -52,11 +57,21 @@ emptyBook =
     }
 
 
-model : Model
-model =
+inititalModel : Model
+inititalModel =
     { books = []
     , form = emptyBook
     }
+
+
+init : Maybe Model -> ( Model, Cmd msg )
+init model =
+    case model of
+        Just model ->
+            ( model, Cmd.none )
+
+        Nothing ->
+            ( inititalModel, Cmd.none )
 
 
 
@@ -129,6 +144,22 @@ view { books, form } =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+    Sub.none
+
+
+
+-- PORTS
+
+
+port setStorage : Model -> Cmd msg
+
+
+
 -- UPDATE
 
 
@@ -187,29 +218,49 @@ removeBook book model =
     { model | books = List.filter (\b -> b /= book) model.books }
 
 
-update : Message -> Model -> Model
+update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         Submit ->
-            model
-                |> copyBookFromForm
-                |> clearForm
+            let
+                newModel =
+                    model
+                        |> copyBookFromForm
+                        |> clearForm
+            in
+            ( newModel, setStorage newModel )
 
         Title title ->
-            title
-                |> asTitleIn model.form
-                |> asFormIn model
+            let
+                newModel =
+                    title
+                        |> asTitleIn model.form
+                        |> asFormIn model
+            in
+            ( newModel, setStorage newModel )
 
         Author author ->
-            author
-                |> asAuthorIn model.form
-                |> asFormIn model
+            let
+                newModel =
+                    author
+                        |> asAuthorIn model.form
+                        |> asFormIn model
+            in
+            ( newModel, setStorage newModel )
 
         Genre genre ->
-            genre
-                |> asGenreIn model.form
-                |> asFormIn model
+            let
+                newModel =
+                    genre
+                        |> asGenreIn model.form
+                        |> asFormIn model
+            in
+            ( newModel, setStorage newModel )
 
         Remove book ->
-            model
-                |> removeBook book
+            let
+                newModel =
+                    model
+                        |> removeBook book
+            in
+            ( newModel, setStorage newModel )

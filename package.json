@@ -1,0 +1,22 @@
+{
+    "private": true,
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "elm-make --yes src/Main.elm --output public/build/index.js",
+      "start": "run-p watch serve",
+      "watch": "nodemon --watch src --ext elm --exec 'npm run build'",
+      "serve": "cd public && browser-sync start --server --files 'build/*.js, *.css'",
+      "dev": "run-p dev:refresh dev:reactor",
+      "dev:refresh": "browser-sync start --proxy localhost:7072 --files 'src/*.elm'",
+      "dev:reactor": "elm-reactor -a 0.0.0.0 -p 7072",
+      "deploy": "run-s build deploy:run",
+      "deploy:run": "gh-pages -d public"
+    },
+    "devDependencies": {
+      "browser-sync": "2.12.8",
+      "gh-pages": "0.11.0",
+      "nodemon": "1.9.2",
+      "npm-run-all": "2.1.0"
+    },
+    "dependencies": {}
+  }

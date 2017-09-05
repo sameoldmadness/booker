@@ -1,0 +1,20 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+input, button {
+    display: block;
+    margin: 10px;
+}
+
+.book__remove {
+    color: crimson;
+    margin-left: .3em;
+    display: none;
+    cursor: pointer;
+}
+
+.book:hover .book__remove {
+    display: inline-block;
+}
